@@ -1,101 +1,190 @@
-import Image from "next/image";
+"use client"
 
-export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="https://nextjs.org/icons/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+import { useState, useRef, useEffect } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { Save, Brain } from 'lucide-react'
+import axios from 'axios'
+import { randomId } from '@/lib/random'
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="https://nextjs.org/icons/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
-  );
+export default function Component() {
+	const [userId, setUserId] = useState('')
+	useEffect(() => {
+		const userId = localStorage.getItem('userId');
+		if (!userId) {
+			const newUserId = randomId();
+
+			localStorage.setItem('userId', newUserId);
+			setUserId(newUserId);
+		} else {
+			setUserId(userId);
+		}
+	}, []);
+	const [question, setQuestion] = useState('')
+	const [answer, setAnswer] = useState('')
+	const [isFlipped, setIsFlipped] = useState(false)
+	const [isEditing, setIsEditing] = useState({ question: false, answer: false })
+	const [showSaveButton, setShowSaveButton] = useState(false)
+	const [isResetting, setIsResetting] = useState(false)
+	const inputRef = useRef<HTMLInputElement>(null)
+
+	useEffect(() => {
+		if (isEditing.question || isEditing.answer) {
+			inputRef.current?.focus()
+		}
+	}, [isEditing])
+
+	useEffect(() => {
+		setShowSaveButton(!!answer.trim())
+	}, [answer])
+
+	const handleQuestionSubmit = (e: React.KeyboardEvent<HTMLInputElement>) => {
+		if (e.key === 'Enter' && question.trim() !== '') {
+			setIsFlipped(true)
+		}
+	}
+
+	const handleAnswerSubmit = (e: React.KeyboardEvent<HTMLInputElement>) => {
+		if (e.key === 'Enter' && answer.trim() !== '') {
+			setIsFlipped(false)
+		}
+	}
+
+	const handleSave = () => {
+		console.log('Saving:', { question, answer })
+		// Implement your save logic here
+		axios.post('/api', { question, answer, userId })
+
+		setIsResetting(true)
+	}
+
+	const resetCards = () => {
+		setQuestion('')
+		setAnswer('')
+		setIsFlipped(false)
+		setShowSaveButton(false)
+		setIsResetting(false)
+	}
+
+	const handleTestYourself = () => {
+		console.log('Test Yourself clicked')
+		// Implement your test logic here
+	}
+
+	return (
+		<div className="min-h-screen bg-gradient-to-br from-purple-400 to-indigo-600 flex flex-col items-center justify-center p-4">
+			<header className="w-full text-center mb-8">
+				<h1 className="text-4xl font-bold text-white tracking-wider">MASTERMIND</h1>
+			</header>
+			<AnimatePresence mode="wait" onExitComplete={() => isResetting && resetCards()}>
+				{!isResetting && (
+					<motion.div
+						key="card"
+						initial={false}
+						exit={{ x: '100%' }}
+						transition={{ duration: 0.37 }}
+						className="w-full max-w-md [perspective:1000px]"
+					>
+						<motion.div
+							className="w-full h-64 relative [transform-style:preserve-3d]"
+							animate={{ rotateY: isFlipped ? 180 : 0 }}
+							transition={{ duration: 0.37 }}
+						>
+							<div
+								className={`absolute w-full h-full bg-yellow-200 rounded-lg shadow-lg p-6 [backface-visibility:hidden] ${isFlipped ? 'hidden' : ''
+									}`}
+							>
+								<div className="flex flex-col h-full text-black">
+									<label htmlFor="question" className="text-lg font-semibold mb-2">Question:</label>
+									{isEditing.question ? (
+										<input
+											ref={inputRef}
+											type="text"
+											id="question"
+											value={question}
+											onChange={(e) => setQuestion(e.target.value)}
+											onKeyPress={handleQuestionSubmit}
+											onBlur={() => setIsEditing({ ...isEditing, question: false })}
+											className="bg-transparent border-b-2 border-gray-600 focus:outline-none focus:border-blue-500 transition-colors duration-300"
+										/>
+									) : (
+										<p onClick={() => setIsEditing({ ...isEditing, question: true })} className="cursor-pointer flex-grow">
+											{question || 'Click to add question'}
+										</p>
+									)}
+								</div>
+							</div>
+							<div
+								className={`absolute w-full h-full bg-yellow-200 rounded-lg shadow-lg p-6 [backface-visibility:hidden] [transform:rotateY(180deg)] ${isFlipped ? '' : 'hidden'
+									}`}
+							>
+								<div className="flex flex-col h-full text-black">
+									<label htmlFor="answer" className="text-lg font-semibold mb-2">Answer:</label>
+									{isEditing.answer ? (
+										<input
+											ref={inputRef}
+											type="text"
+											id="answer"
+											value={answer}
+											onChange={(e) => setAnswer(e.target.value)}
+											onKeyPress={handleAnswerSubmit}
+											onBlur={() => setIsEditing({ ...isEditing, answer: false })}
+											className="bg-transparent border-b-2 border-gray-600 focus:outline-none focus:border-blue-500 transition-colors duration-300"
+										/>
+									) : (
+										<p onClick={() => setIsEditing({ ...isEditing, answer: true })} className="cursor-pointer flex-grow">
+											{answer || 'Click to add answer'}
+										</p>
+									)}
+								</div>
+							</div>
+						</motion.div>
+					</motion.div>
+				)}
+			</AnimatePresence>
+			{question && answer && !isResetting && (
+				<motion.div
+					initial={{ opacity: 0, y: 20 }}
+					animate={{ opacity: 1, y: 0 }}
+					exit={{ opacity: 0, y: -20 }}
+					transition={{ duration: 0.37 }}
+					className="mt-8 flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4 text-black"
+				>
+					<div className="bg-yellow-200 rounded-lg shadow-lg p-4">
+						<p className="font-semibold">Q: {question}</p>
+					</div>
+					<div className="bg-yellow-200 rounded-lg shadow-lg p-4">
+						<p className="font-semibold">A: {answer}</p>
+					</div>
+				</motion.div>
+			)}
+			<div className="mt-8 flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
+				<AnimatePresence>
+					{showSaveButton && !isResetting && (
+						<motion.button
+							initial={{ opacity: 0, y: 20 }}
+							animate={{ opacity: 1, y: 0 }}
+							exit={{ opacity: 0, y: 20 }}
+							transition={{ duration: 0.37 }}
+							onClick={handleSave}
+							className="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-full shadow-lg flex items-center justify-center transition-colors duration-300"
+							whileHover={{ scale: 1.05 }}
+							whileTap={{ scale: 0.95 }}
+						>
+							<Save className="mr-2" size={20} />
+							Save
+						</motion.button>
+					)}
+				</AnimatePresence>
+				<motion.button
+					onClick={handleTestYourself}
+					className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-full shadow-lg flex items-center justify-center transition-colors duration-300"
+					whileHover={{ scale: 1.05 }}
+					whileTap={{ scale: 0.95 }}
+				>
+					<Brain className="mr-2" size={20} />
+					Test Yourself
+				</motion.button>
+			</div>
+		</div>
+	)
 }
