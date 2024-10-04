@@ -27,10 +27,6 @@ export default function TestPage() {
         try {
             const response = await fetch(`/api?userId=${localStorage.getItem('userId')}`)
             const data: IFlashCard = await response.json()
-            data.aiAnswers = data.aiAnswers.sort(() => Math.random() - 0.5)
-
-            await new Promise(resolve => setTimeout(resolve, 1000))
-            
             setFlashcard(data)
             setSelectedAnswer(null)
             setIsSubmitted(false)
@@ -54,7 +50,7 @@ export default function TestPage() {
         setIsSubmitted(true)
     }
 
-    const isCorrectAnswer = selectedAnswer === correctAnswer
+    const isCorrectAnswer = selectedAnswer === flashcard?.aiAnswers[0]
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-purple-400 to-indigo-600 flex flex-col items-center justify-center p-4">
@@ -63,7 +59,7 @@ export default function TestPage() {
                 <div className="w-full max-w-2xl bg-white rounded-lg shadow-lg p-6 text-black">
                     <h2 className="text-2xl font-semibold mb-4">{flashcard.aiRefactoredQuestion || flashcard.question}</h2>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                        {flashcard.aiAnswers.map((answer, index) => (
+                        {[...flashcard.aiAnswers].sort(() => Math.random() - 0.5).map((answer, index) => (
                             <motion.div
                                 key={index}
                                 className={`p-4 rounded-lg cursor-pointer ${selectedAnswer === answer
