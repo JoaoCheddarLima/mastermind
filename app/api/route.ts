@@ -1,6 +1,7 @@
+import { aiEmpowerCard } from "@/lib/ai";
 import connectToDb from "@/lib/db";
 import { randomId } from "@/lib/random";
-import { FlashCard } from "@/model/card";
+import { FlashCard, IFlashCard } from "@/model/card";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(request: NextRequest) {
@@ -21,6 +22,8 @@ export async function POST(request: NextRequest) {
         createdAt: Date.now(),
     });
 
+    aiEmpowerCard({ id, question, answer } as IFlashCard);
+
     return NextResponse.json({ id, ok: true });
 }
 
@@ -36,7 +39,8 @@ export async function GET(request: NextRequest) {
     }
 
     const card = await FlashCard.findOne({
-        userId
+        userId,
+        aiEmpowered: true,
     })
 
     return NextResponse.json(card);
