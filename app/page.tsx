@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Save, Brain } from 'lucide-react'
 import axios from 'axios'
 import { randomId } from '@/lib/random'
+import Link from 'next/link'
 
 export default function Component() {
 	const [userId, setUserId] = useState('')
@@ -175,15 +176,19 @@ export default function Component() {
 						</motion.button>
 					)}
 				</AnimatePresence>
-				<motion.button
-					onClick={handleTestYourself}
-					className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-full shadow-lg flex items-center justify-center transition-colors duration-300"
-					whileHover={{ scale: 1.05 }}
-					whileTap={{ scale: 0.95 }}
+				<Link
+					href={'/test'}
 				>
-					<Brain className="mr-2" size={20} />
-					Test Yourself
-				</motion.button>
+					<motion.button
+						onClick={handleTestYourself}
+						className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-full shadow-lg flex items-center justify-center transition-colors duration-300"
+						whileHover={{ scale: 1.05 }}
+						whileTap={{ scale: 0.95 }}
+					>
+						<Brain className="mr-2" size={20} />
+						Test Yourself
+					</motion.button>
+				</Link>
 			</div>
 		</div>
 	)
