@@ -22,6 +22,7 @@ export default function TestPage() {
     const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null)
     const [isSubmitted, setIsSubmitted] = useState(false)
     const [correctAnswer, setCorrectAnswer] = useState<string>()
+    const [clonedAndSorted, setClonedAndSorted] = useState<string[]>([])
 
     const fetchQuestion = async () => {
         try {
@@ -31,6 +32,8 @@ export default function TestPage() {
             setSelectedAnswer(null)
             setIsSubmitted(false)
             setCorrectAnswer(data.aiAnswers[0])
+            const clonedAndSorted = [...data?.aiAnswers!].sort(() => Math.random() - 0.5)
+            setClonedAndSorted(clonedAndSorted)
         } catch (error) {
             console.error('Error fetching question:', error)
         }
@@ -59,7 +62,7 @@ export default function TestPage() {
                 <div className="w-full max-w-2xl bg-white rounded-lg shadow-lg p-6 text-black">
                     <h2 className="text-2xl font-semibold mb-4">{flashcard.aiRefactoredQuestion || flashcard.question}</h2>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                        {[...flashcard.aiAnswers].sort(() => Math.random() - 0.5).map((answer, index) => (
+                        {clonedAndSorted.map((answer, index) => (
                             <motion.div
                                 key={index}
                                 className={`p-4 rounded-lg cursor-pointer ${selectedAnswer === answer
