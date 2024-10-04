@@ -14,19 +14,22 @@ Welcome to the AI Empowered Flashcards App! This app helps you learn better by a
 
 ## Getting Started
 
-1. **Clone the repository**:
-    ```sh
-    git clone https://github.com/yourusername/flashcards-app.git
-    ```
-2. **Install dependencies**:
-    ```sh
-    cd flashcards-app
-    yarn
-    ```
-3. **Run the app**:
-    ```sh
-    yarn start
-    ```
+**Clone the repository**:
+```sh
+
+git clone https://github.com/yourusername/flashcards-app.git
+
+```
+
+**Install dependencies**:
+```sh
+cd flashcards-app
+yarn
+```
+**Run the app**:
+```sh
+yarn start
+```
 
 ## License
 
